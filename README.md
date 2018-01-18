@@ -6,8 +6,10 @@ The purpose of this program is to demostrate how to combin intel TBB pipeline an
 OpenCV 3.3 and Intel TBB package is required
 
 macOS
+    
     please refer to http://macappstore.org/tbb/
     basically, just execute "brew install tbb" on your terminal
+
 ubuntu
 
 ### Installing
