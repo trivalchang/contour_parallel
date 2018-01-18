@@ -21,5 +21,10 @@ ubuntu
     # ./contour
 the program reads the image files under cup and outputs the contour under output.
 
+### Performance 
+
+    TBB version is about 40% faster than the serial version
+
 ### Known issue
-imshow() in make_filter causes execption
+
+    imshow() in make_filter causes execption
