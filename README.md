@@ -23,7 +23,7 @@ the program reads the image files under cup and outputs the contour under output
 
 ### Performance 
 
-    TBB version is about 40% faster than the serial version
+    TBB version is about 40% faster than the serial version on 2-core MacBook Pro
 
 ### Known issue
 
