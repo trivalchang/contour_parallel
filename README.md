@@ -11,7 +11,6 @@ macOS
 ubuntu
 
 ### Installing
-After downlowd this progam
     # cd contour_parallel
     # cmake .
     # make
