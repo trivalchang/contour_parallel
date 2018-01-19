@@ -39,11 +39,11 @@
 
 #define GETCPU(CPU) {                                   \
         int _cpu, _status;                              \
-        status = syscall(SYS_getcpu, &cpu, NULL, NULL); \
-        if (status != 0)                                \
+        _status = syscall(SYS_getcpu, &_cpu, NULL, NULL); \
+        if (_status != 0)                                \
             CPU = 0;                                    \
         else                                            \
-            CPU = cpu;                                  \
+            CPU = _cpu;                                  \
       }
 
 #endif
@@ -155,7 +155,7 @@ void findContourParallel(vector<string> &files) {
 				string name = string("./output/cup")+ to_string(rand()) + string(".png");
 				//cout << "CPU " << cpu << " filter 3 write " << name << endl;
 				imwrite(name , image);
-                cout << "CPU " << cpu << " filter 3 Done " << endl;
+                //cout << "CPU " << cpu << " filter 3 Done " << endl;
 			}
         )
     );

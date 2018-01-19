@@ -23,8 +23,8 @@ the program reads the image files under cup and outputs the contour under output
 
 ### Performance 
 
-    TBB version is about 40% faster than the serial version on 2-core MacBook Pro
+    Compared to serial version, TBB version is about 40% faster on dual core MacBook Pro and 3~4 times faster on quad core ubuntu 
 
 ### Known issue
 
-    imshow() in make_filter causes execption
+    Due to thread safe issue, imshow() in make_filter causes execption

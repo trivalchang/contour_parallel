@@ -1,3 +1,0 @@
-/Users/developer/guru/opencv_c/contour_parallel/CMakeFiles/rebuild_cache.dir
-/Users/developer/guru/opencv_c/contour_parallel/CMakeFiles/edit_cache.dir
-/Users/developer/guru/opencv_c/contour_parallel/CMakeFiles/contour.dir
