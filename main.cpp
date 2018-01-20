@@ -201,7 +201,7 @@ int main()
 	cout << "img count = " << imgNameList.size() << endl;
 
     tbb::tick_count t0 = tbb::tick_count::now();
-    //findContourParallel(imgNameList);  
+    findContourParallel(imgNameList);  
     tbb::tick_count t1 = tbb::tick_count::now();
     cout << "findContourParallel takes " << (t1 - t0).seconds() << endl;
 
