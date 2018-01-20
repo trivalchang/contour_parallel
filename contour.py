@@ -6,6 +6,7 @@ import argparse
 import cv2
 import os 
 import sys
+import random
 
 sys.path.insert(0, '/Users/developer/guru/')
 
@@ -27,7 +28,11 @@ while (True):
 	contour = contour[1]
 
 	drawing = np.zeros(img.shape, dtype=np.uint8)
-	cv2.drawContours(drawing, contour, -1, (255, 0, 0), 2)
+	#cv2.drawContours(drawing, contour, -1, (255, 0, 0), 2)
+	for cnt in contour:
+		color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+		cv2.drawContours(drawing, [cnt], -1, color, 2)
+
 	name = 'output/pimg'+str(cntFrame)+'.png'
 	cntFrame = cntFrame + 1
 	cv2.imwrite(name, drawing)

@@ -18,12 +18,19 @@ ubuntu
     # make
     
 ### Running the program
+	C++ version
     # ./contour
+    
+    python version
+    # python contour.py
 the program reads the image files under cup and outputs the contour under output.
 
 ### Performance 
 
-    Compared to serial version, TBB version is about 40% faster on dual core MacBook Pro and 3~4 times faster on quad core ubuntu 
+	on dual-core Macbook Pro
+	C++ TBB parallel - 0.11 sec
+	C++ serial - 0.22 sec
+	Python serial - 0.27 sec
 
 ### Known issue
 
