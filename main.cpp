@@ -79,7 +79,7 @@ void findContourParallel(vector<string> &files) {
     int writeIdx = 0;
     RNG rng(12345);
     
-    namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
+    //namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
     parallel_pipeline( /*max_number_of_live_token=*/16,       
         make_filter<void, Mat>(
             filter::serial,
@@ -165,7 +165,7 @@ void findContourSerial(vector<string> &files) {
     int idx=0;
     Mat image, grayImg, binaryImg;
     RNG rng(12345);
-    namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
+    //namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
     for (vector<string>::iterator it = files.begin() ; it != files.end(); ++it)
     {
 	    string name = string("./output/cup")+ to_string(rand()) + string(".png");    
@@ -201,7 +201,7 @@ int main()
 	cout << "img count = " << imgNameList.size() << endl;
 
     tbb::tick_count t0 = tbb::tick_count::now();
-    findContourParallel(imgNameList);  
+    //findContourParallel(imgNameList);  
     tbb::tick_count t1 = tbb::tick_count::now();
     cout << "findContourParallel takes " << (t1 - t0).seconds() << endl;
 
