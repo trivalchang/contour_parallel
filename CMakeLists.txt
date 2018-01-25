@@ -2,6 +2,11 @@
 cmake_minimum_required(VERSION 2.8)
 project( contour )
 find_package( OpenCV REQUIRED )
+#find_package( CUDA REQUIRED )
+
+IF (CUDA_FOUND)
+	add_compile_options(-DHAVE_CUDA)
+ENDIF()
 
 add_compile_options(-g -std=c++11)
 

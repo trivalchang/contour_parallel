@@ -16,6 +16,13 @@
 #include <sys/syscall.h>
 #include <stdlib.h>
 
+#ifdef HAVE_CUDA
+
+#include "opencv2/cudaarithm.hpp"
+#include "opencv2/cudaimgproc.hpp"
+
+#endif
+
 
 #if defined(__APPLE__) && defined(__MACH__)
 
@@ -116,7 +123,7 @@ void findContourParallel(vector<string> &files) {
                 //cout << "CPU " << cpu << " filter 1 gray " << endl;
 
                 cvtColor(image, grayImg, CV_RGB2GRAY);
-                threshold(grayImg, binaryImg, 128, 256, THRESH_BINARY_INV);
+                threshold(grayImg, binaryImg, 128, 255, THRESH_BINARY_INV);
 
                 //cout << "CPU " << cpu << " filter 1 Done " << endl;
             	return binaryImg;
@@ -152,7 +159,8 @@ void findContourParallel(vector<string> &files) {
 				int cpu;
 
                 GETCPU(cpu);
-				string name = string("./output/cup")+ to_string(rand()) + string(".png");
+				string name = string("./output/cup")+ to_string(idx) + string("_parallel.png");
+				idx++;
 				//cout << "CPU " << cpu << " filter 3 write " << name << endl;
 				imwrite(name , image);
                 //cout << "CPU " << cpu << " filter 3 Done " << endl;
@@ -165,20 +173,33 @@ void findContourSerial(vector<string> &files) {
     int idx=0;
     Mat image, grayImg, binaryImg;
     RNG rng(12345);
+
+    tbb::tick_count::interval_t t0_threshold((double)0), t0_gray((double)0), t0_findContour((double)0);;
+    
     //namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
     for (vector<string>::iterator it = files.begin() ; it != files.end(); ++it)
     {
-	    string name = string("./output/cup")+ to_string(rand()) + string(".png");    
+	    string name = string("./output/cup")+ to_string(idx++) + string("_serial.png");    
         vector<vector<Point> > contours;
         vector<Vec4i> hierarchy;
         Mat drawing;
+        tbb::tick_count t0;
         
         image = imread(*it, CV_LOAD_IMAGE_COLOR); 
+
+        t0 = tbb::tick_count::now();
         cvtColor(image, grayImg, CV_RGB2GRAY);
-        threshold(grayImg, binaryImg, 128, 256, THRESH_BINARY_INV);
+        t0_gray += (tbb::tick_count::now()-t0);
+
+        t0 = tbb::tick_count::now();
+        threshold(grayImg, binaryImg, 128, 255, THRESH_BINARY_INV);
+        t0_threshold += (tbb::tick_count::now() - t0);
+        
         drawing = Mat::zeros( binaryImg.size(), CV_8UC3 );
 
+        t0 = tbb::tick_count::now();
         findContours( binaryImg, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+        t0_findContour += (tbb::tick_count::now()-t0);
         
         for( int i = 0; i< contours.size(); i++ )
         {
@@ -188,11 +209,70 @@ void findContourSerial(vector<string> &files) {
 
         
         imwrite(name , drawing);
-        //imshow("Display window", grayImg);
-        //waitKey(0);
     }
+
+    cout << "   gray takes " << t0_gray.seconds() << endl;
+    cout << "   threshold takes " << t0_threshold.seconds() << endl;   
+    cout << "   findContour takes " << t0_findContour.seconds() << endl;
 }
 
+#ifdef HAVE_CUDA
+void findContourSerialCuda(vector<string> &files) {
+    int idx=0;
+    cv::cuda::GpuMat imgCuda, grayCuda, binaryCuda;
+    tbb::tick_count::interval_t t0_upload((double)0), 
+                                t0_threshold((double)0), 
+                                t0_gray((double)0),
+                                t0_findContour((double)0);
+
+    printf("CUDA Device count = %d\n", cuda::getCudaEnabledDeviceCount());
+
+    RNG rng(12345);
+    //namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
+    for (vector<string>::iterator it = files.begin() ; it != files.end(); ++it)
+    {
+	    string name = string("./output/cup")+ to_string(idx++) + string("_cuda.png");    
+        vector<vector<Point> > contours;
+        vector<Vec4i> hierarchy;
+        Mat drawing;
+        tbb::tick_count t0;
+
+        t0 = tbb::tick_count::now();
+        imgCuda.upload(imread(*it, CV_LOAD_IMAGE_COLOR));
+        t0_upload += (tbb::tick_count::now() - t0);
+
+        t0 = tbb::tick_count::now();
+        cuda::cvtColor(imgCuda, grayCuda, CV_RGB2GRAY);
+        t0_gray += (tbb::tick_count::now() - t0);
+
+        t0 = tbb::tick_count::now();
+        cuda::threshold(grayCuda, binaryCuda, 128, 255, THRESH_BINARY_INV);
+        t0_threshold += (tbb::tick_count::now() - t0);
+
+        t0 = tbb::tick_count::now();
+        findContours( Mat(binaryCuda), contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+        t0_findContour += (tbb::tick_count::now() - t0);        
+
+        drawing = Mat::zeros( binaryCuda.size(), CV_8UC3 );
+        
+        for( int i = 0; i< contours.size(); i++ )
+        {
+            Scalar color = Scalar(rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) );
+            drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+        }
+
+        
+        imwrite(name , drawing);
+
+    }
+
+    cout << "   upload takes " << t0_upload.seconds() << endl;
+    cout << "   gray takes " << t0_gray.seconds() << endl;
+    cout << "   threshold takes " << t0_threshold.seconds() << endl;
+    cout << "   findContour takes " << t0_findContour.seconds() << endl;
+    
+}
+#endif
 
 int main() 
 {
@@ -209,7 +289,14 @@ int main()
     findContourSerial(imgNameList); 
     t1 = tbb::tick_count::now();
     cout << "findContourSerial takes " << (t1 - t0).seconds() << endl;
-    
+
+#ifdef HAVE_CUDA    
+    t0 = tbb::tick_count::now();
+    findContourSerialCuda(imgNameList); 
+    t1 = tbb::tick_count::now();
+    cout << "findContourSerialCuda takes " << (t1 - t0).seconds() << endl;
+#endif
+
     return 0;
 }
 
